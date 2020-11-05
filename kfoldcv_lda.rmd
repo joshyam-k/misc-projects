@@ -1,0 +1,69 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(palmerpenguins)
+data(penguins)
+```
+
+
+# a 5-fold CV function for lda and qda
+
+
+```{r}
+
+# place to store MSE outputs
+MSE = data.frame()
+
+k_foldcv_lda <- function(data, k = 10, seed, response, pred1, pred2){
+  require(MASS)
+  # drop na
+  data <- data %>%
+    drop_na()
+  
+  # shuffle data
+  set.seed(as.double(seed))
+  data <- data[sample(nrow(data)), replace = F]
+  
+  # make folds
+  folds <- data %>%
+    mutate(fold = cut(seq(1, nrow(data)), breaks = k, labels = F))
+  
+  # for loop for mse
+  for (i in 1:k){
+    
+  # create test/train splits
+  testdata <- folds %>%  
+    filter(fold == i)
+  traindata <- anti_join(data, testdata) 
+  
+  # build model
+  model_chosen <- lda(response ~ pred1 + pred2,
+               data = traindata)
+
+  # calculate probabilities for each obs
+  prob <- predict(model_chosen, testdata,
+                      type = "response") 
+  conf <- table(prob$class,
+                testdata$response )
+  # calculate indv mse
+  MSE <- rbind(MSE,
+               data.frame(mse = (sum(conf) - sum(diag(conf)))/sum(conf)))
+  }
+  return (MSE %>%
+            summarise(cvMSE = mean(mse))) 
+}
+```
+
+
+```{r}
+k_foldcv_lda(penguins, 5, 34, sex, flipper_length_mm, body_mass_g)
+```
+
+
+
+
