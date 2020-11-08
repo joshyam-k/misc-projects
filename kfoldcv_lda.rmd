@@ -61,7 +61,47 @@ k_foldcv_lda <- function(data, k = 10, seed, response, pred1, pred2){
 
 
 ```{r}
-k_foldcv_lda(penguins, 5, 34, sex, flipper_length_mm, body_mass_g)
+
+MSE = data.frame()
+
+k_foldcv_lda <- function(data, k = 10, seed, response, pred1, pred2){
+  require(MASS)
+
+  data <- data %>%
+    drop_na()
+  
+
+  set.seed(as.double(seed))
+  data <- data[sample(nrow(data)), replace = F]
+  
+
+  folds <- data %>%
+    mutate(fold = cut(seq(1, nrow(data)), breaks = k, labels = F))
+  
+
+  for (i in 1:k){
+    
+
+  testdata <- folds %>%  
+    filter(fold == i)
+  traindata <- anti_join(data, testdata) 
+  
+
+  model_chosen <- qda(response ~ pred1 + pred2,
+               data = traindata)
+
+
+  prob <- predict(model_chosen, testdata,
+                      type = "response") 
+  conf <- table(prob$class,
+                testdata$response )
+
+  MSE <- rbind(MSE,
+               data.frame(mse = (sum(conf) - sum(diag(conf)))/sum(conf)))
+  }
+  return (MSE %>%
+            summarise(cvMSE = mean(mse))) 
+}
 ```
 
 
