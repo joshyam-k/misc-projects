@@ -1,0 +1,156 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(rmarkdown)
+```
+
+```{r}
+responses <- read_excel("xlsx file from google form")
+```
+
+
+```{r}
+res <-
+  responses %>%
+  clean_names()
+
+# a function to filter out the responses for a given presenter
+isolate_name <- function(names) {
+  res %>%
+    filter(name_of_presenter == names)
+}
+```
+
+
+```{r}
+write_feedback_lines <- function(df) {
+  out <- c()
+  
+  out <- 
+    c(
+      out,
+      paste0("## ", presenter_df$name_of_presenter[1]),
+      " "
+    )
+  
+  out <- c(
+    out,
+    "### sub title 1",
+    " "
+  )
+  
+  # these for loops are my weird way of spacing out the lines
+  for (i in 1:nrow(df)){
+  out <- c(
+    out,
+    presenter_df$var[i],
+    " ",
+    "\n"
+  )
+  }
+  out <- c(
+    out,
+    "### sub title 2",
+    " "
+  )
+  
+  for (i in 1:nrow(df)){
+  out <- c(
+    out,
+    df$var[i],
+    " ",
+    "\n"
+    
+  )
+  }
+  out <- c(
+    out,
+    "### sub title 3",
+    " "
+  )
+  
+  for (i in 1:nrow(df)){
+  out <- c(
+    out,
+    df$var[i],
+    " ",
+    "\n"
+  )
+  }
+  out<-out[!is.na(out)]
+  out
+}
+
+```
+
+
+
+```{r}
+feedback_list <- 
+  map(
+    unique(res$name_of_presenter),
+    isolate_presenter
+  )
+```
+
+
+```{r}
+presenter_lines <-
+  map(
+    feedback_list,
+    write_feedback_lines
+  )
+
+```
+
+```{r}
+filenames <- 
+  res$name_of_presenter %>%
+  unique() %>%
+  make_clean_names()
+
+```
+
+```{r}
+folder <- "pathname to a folder on your computer"
+
+# a function to write lines to a file
+write_feedback_md <- function(filename, lines, folder) {
+  path <- paste0(folder, "/", filename, ".md")
+  
+  file.create(path)
+  
+  write_lines(lines, path)
+}
+
+# write the lines of the vectors to an .md file
+map2(
+  filenames,
+  presenter_lines,
+  write_feedback_md,
+  folder
+)
+
+# knit the mds to pdfs
+map(
+  paste0(folder, "/", filenames, ".md"),
+  rmarkdown::render,
+  "pdf_document"
+)
+
+files <- list.files(folder, full.names = TRUE)
+mds <- files[str_detect(files, ".md")]
+file.remove(mds)
+
+```
+
+
+
+
