@@ -1,0 +1,305 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# loading necessary packages
+# -------------------------------------------------------------------------
+library(tidyverse)
+library(biscale)
+library(spData)
+library(cowplot)
+library(ggtext)
+library(waffle)
+library(ggpubr)
+
+# loading in data
+# -------------------------------------------------------------------------
+diversity_school <- 
+  read_csv("https://raw.githubusercontent.com/Reed-Statistics/data-viz-competition-2020/main/data/diversity_school.csv") %>%
+  dplyr::select(-X1)
+
+salary_potential <-
+  read_csv("https://raw.githubusercontent.com/Reed-Statistics/data-viz-competition-2020/main/data/salary_potential.csv") %>%
+  dplyr::select(-X1)
+
+# tidying + transforming
+# -------------------------------------------------------------------------
+minority_prop_by_state <- 
+  diversity_school %>%
+    filter(category == "Total Minority") %>%
+    filter(state != "Alaska") %>%
+    filter(state != "Hawaii") %>%
+    drop_na() %>%
+    mutate(prop_minority = enrollment/total_enrollment) %>%
+    group_by(state) %>%
+    summarise(prop_minority = mean(prop_minority))
+
+mwb_perc_by_state <- 
+  salary_potential %>%
+  drop_na() %>%
+  filter(state_name != "Alaska" , state_name != "Hawaii") %>%
+  group_by(state_name) %>%
+  summarise(make_world_better_percent = mean(make_world_better_percent)) %>%
+  mutate(state_name = str_replace(state_name, "-", " "))
+
+minority_mwb <- 
+  minority_prop_by_state %>%
+  left_join(mwb_perc_by_state, by = c("state" = "state_name"))
+
+bi_scale_data <- 
+  bi_class(
+    minority_mwb, 
+    x = prop_minority,
+    y = make_world_better_percent,
+    style = "quantile",
+    dim = 3
+  )
+
+us_states <- 
+  us_states %>%
+  filter(NAME != "District of Columbia") %>%
+  left_join(bi_scale_data, by = c("NAME" = "state"))
+
+# plotting
+# -------------------------------------------------------------------------
+newmap <- 
+  ggplot() +
+  geom_sf(
+    data = us_states,
+    mapping = aes(fill = bi_class),
+    color = "white",
+    size = 0.1,
+    show.legend = FALSE
+  ) +
+  bi_scale_fill(
+    pal = "DkCyan",
+    dim = 3
+  ) +
+  bi_theme(
+    bg_color = "grey20",
+    font_color = "lightgrey",
+    base_family = "Times",
+    base_size = 12
+  ) +
+  labs(
+    title = "Diversity's Impact on Student Fulfillment",
+    caption = "Mean % of College Alumni Believing They're Making \nthe World a Better Place by % Nonwhite Students"
+  ) +
+  theme(
+    plot.title.position = "plot",
+    plot.caption.position =  "plot",
+    plot.caption = element_text(hjust = 1, face= "italic")
+  ) 
+
+leg <- 
+  bi_legend(
+    pal = "DkCyan",
+    dim = 3,
+    xlab = "Proportion Minority",
+    ylab = "Make World Better %",
+    size = 1
+    ) +
+  bi_theme(
+    bg_color = "grey20",
+    font_color = "lightgrey",
+    base_family = "Times",
+    base_size = 6
+  )
+
+map_legend_us <- 
+  ggdraw() +
+  draw_plot(newmap, 0, 0, 1, 1) +
+  draw_plot(leg, 0, 0.055, 0.27, 0.27) 
+
+map_legend_us
+```
+
+
+```{r}
+west <- c("California", "Oregon", "Washington", "Nevada",
+          "Arizona", "New Mexico", "Colorado", "Utah",
+          "Wyoming", "Idaho", "Montana")
+
+midwest <- c("Illinois", "Indiana", "Michigan", "Ohio",
+             "Wisconsin", "Iowa", "Kansas", "Minnesota",
+             "Missouri", "Nebraska", "North Dakota", "South Dakota")
+
+south <- c("Delaware", "Florida", "Georgia", "Maryland", 
+           "North Carolina", "South Carolina", "Virginia", "West Virginia")
+
+northeast <- c("Connecticut", "Maine", "Massachusetts",
+               "New Hampshire", "Rhode Island", "Vermont","New Jersey",
+               "New York", "Pennsylvania")
+```
+
+```{r}
+diversity_race <- 
+  diversity_school %>%
+  filter(category != "Women" , category != "Total Minority")
+
+schools_west <- 
+  diversity_race %>%
+  filter(state %in% west) %>%
+  group_by(category) %>%
+  summarise(race_breakdown = sum(enrollment)) %>%
+  mutate(race_breakdown = (race_breakdown/sum(race_breakdown))*100) 
+
+schools_midwest <-
+  diversity_race %>%
+  filter(state %in% midwest) %>%
+  group_by(category) %>%
+  summarise(race_breakdown = sum(enrollment)) %>% 
+  mutate(race_breakdown = (race_breakdown/sum(race_breakdown))*100) 
+
+schools_south <-
+  diversity_race %>%
+  filter(state %in% south) %>%
+  group_by(category) %>%
+  summarise(race_breakdown = sum(enrollment)) %>%
+  mutate(race_breakdown = (race_breakdown/sum(race_breakdown))*100) 
+
+schools_northeast <-
+  diversity_race %>%
+  filter(state %in% northeast) %>%
+  group_by(category) %>%
+  summarise(race_breakdown = sum(enrollment)) %>%
+  mutate(race_breakdown = (race_breakdown/sum(race_breakdown))*100) 
+```
+
+
+```{r}
+west_vect <- c(`American Indian / Alaska Native` = 1,
+          `Asian` = 9, 
+          `Black` = 7,
+          `Hispanic` = 26, 
+          `Native Hawaiian / Pacific Islander` = 1,
+          `Non-Resident Foreign` = 4,
+          `Two Or More Races` = 4,
+          `Unknown` = 6,
+          `White` = 42) 
+```
+
+
+```{r}
+south_vect <- c(`American Indian / Alaska Native` = 1,
+          `Asian` = 4, 
+          `Black` = 22,
+          `Hispanic` = 11, 
+          `Native Hawaiian / Pacific Islander` = 1,
+          `Non-Resident Foreign` = 3,
+          `Two Or More Races` = 3,
+          `Unknown` = 3,
+          `White` = 52) 
+```
+
+```{r}
+midwest_vect <- c(`American Indian / Alaska Native` = 1,
+          `Asian` = 3, 
+          `Black` = 11,
+          `Hispanic` = 7, 
+          `Native Hawaiian / Pacific Islander` = 1,
+          `Non-Resident Foreign` = 5,
+          `Two Or More Races` = 2,
+          `Unknown` = 5,
+          `White` = 65) 
+```
+
+
+```{r}
+northeast_vect <- c(`American Indian / Alaska Native` = 1,
+          `Asian` = 6, 
+          `Black` = 11,
+          `Hispanic` = 12, 
+          `Native Hawaiian / Pacific Islander` = 1,
+          `Non-Resident Foreign` = 6,
+          `Two Or More Races` = 2,
+          `Unknown` = 7,
+          `White` = 54) 
+```
+
+```{r}
+northeast_waffle <- waffle(northeast_vect,
+                           size = 0.5,
+                           rows = 5,
+                           colors=c("#DB5175","#EC9192","#D0C1B0",
+                                    "#edd1df","#e34d9d", "#A96B7A",
+                                    "#70264c", "#C99FA0", "#990c57"),
+                           legend_pos = "none") +
+  theme(legend.text = element_text(color = "white", family = "Times"))
+```
+
+```{r}
+midwest_waffle <- waffle(midwest_vect,
+                         size = 0.5,
+                         rows = 5,
+                         colors=c("#DB5175","#EC9192","#D0C1B0",
+                                  "#edd1df","#e34d9d", "#A96B7A",
+                                  "#70264c", "#C99FA0", "#990c57"),
+                         legend_pos = "none") +
+  theme(legend.text = element_text(color = "white", family = "Times"))
+```
+
+```{r}
+south_waffle <- waffle(south_vect,
+                       size = 0.5,
+                       rows = 5,
+                       colors=c("#DB5175","#EC9192","#D0C1B0",
+                                "#edd1df","#e34d9d", "#A96B7A",
+                                "#70264c", "#C99FA0", "#990c57"),
+                       legend_pos = "none") +
+  theme(legend.text = element_text(color = "white", family = "Times"))
+```
+
+```{r}
+west_waffle <- waffle(west_vect,
+                      size = 0.5,
+                      rows = 5,
+                      colors=c("#DB5175","#EC9192","#D0C1B0",
+                               "#edd1df","#e34d9d", "#A96B7A",
+                               "#70264c", "#C99FA0", "#990c57"),
+                      legend_pos = "right")  +
+  theme(legend.text = element_text(color = "grey20", family = "Times"))
+
+```
+
+```{r}
+wafs <- ggarrange(northeast_waffle, midwest_waffle, south_waffle, west_waffle,
+          ncol = 1, nrow = 4,
+          labels = c(
+            "N.E.", "M.W.", "S","W"),
+          font.label = list(
+            size = 10, color = "lightgrey", family = "Times"),
+          common.legend = T, legend = "right",
+          hjust = -0.5, vjust= 6,
+          align = "v") +
+  theme(plot.background = element_rect(fill = "grey20"))
+
+
+ggsave("waffle.png", wafs)
+```
+
+
+
+```{r}
+install_github("johannesbjork/LaCroixColoR")
+```
+
+
+```{r}
+library("LaCroixColoR")
+lacroix_palette("Pamplemousse", type = "discrete")
+```
+
+
+
+
+
+
+
+
