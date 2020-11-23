@@ -47,6 +47,7 @@ team_link_df <-
 ```
 
 ```{r}
+# messy function to pull the names, then clean them, then pull the salary
 pull_salary <- function(link){
   page <- read_html("link")
   page <- 
@@ -67,6 +68,7 @@ pull_salary <- function(link){
       as_tibble() %>%
       mutate(id = row_number()) %>%
       rename("name" = value)
+  # joining the player and salary data into a single data frame
   final <- 
     players %>%
       left_join(salary, by = "id") %>%
@@ -79,6 +81,7 @@ pull_salary <- function(link){
 
 
 ```{r}
+# creating a list of data frames for each team of a specific year
 list_of_data <- list()
 for (i in team_link_df$link){
   list_of_data[[i]] <- pull_salary(i)
@@ -86,6 +89,7 @@ for (i in team_link_df$link){
 ```
 
 ```{r}
+# combining all of the data frames in the list and then writting a csv
 salary17 <- bind_rows(list_of_data, .id = "column_label") %>%
   select(-column_label)
 
