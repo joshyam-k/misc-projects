@@ -1,0 +1,29 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidymodels)
+library(modeldata)
+
+data(ames)
+```
+
+```{r}
+ggplot(ames, aes(x = Sale_Price)) + 
+  geom_histogram(
+    bins = 50,
+    color = "black",
+    fill = "midnightblue") +
+  scale_x_log10()
+```
+
+```{r}
+ames <-
+  ames %>%
+  mutate(Sale_Price = log10(Sale_Price))
+```
+
