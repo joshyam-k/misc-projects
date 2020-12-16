@@ -47,6 +47,188 @@ names(x) <- c("a", "b", "c")
 ```
 
 
+## subsetting
+
+using [ always returns the same object as is being modified
+
+```{r}
+x <- c(1,2,3,4,5)
+
+x[3] # outputs the 3rd item in the vector
+
+x[c(2,3)] # outputs the 2nd and 3rd item in the vector
+
+x[c(1,1)] # duplicated indices output duplicated items
+
+x[-c(1,2)] # excludes items at designated indices
+
+
+# recycling rules 
+
+x[c(TRUE, FALSE)]
+# Equivalent to
+x[c(TRUE, FALSE, TRUE, FALSE, TRUE)]
+
+
+x[] # returns the original vector
+```
+
+
+```{r}
+# now lets add a dimension!
+(y <- setNames(x, letters[1:5]))
+
+y[c("a","a","a")] # will output 3 replicas of a,1
+
+```
+
+```{r}
+# lets go to matrices!!
+
+# generally x[rows, columns]
+
+a <- matrix(1:9, nrow = 3)
+colnames(a) <- c("A", "B", "C")
+
+a[1:2, ] # returns the first two rows 
+
+a[c(TRUE, FALSE, TRUE), c("B", "A")] 
+# returns first row, not second, returns third row. it then selects only B
+# and A columns but they will be reordered in the order listed
+
+a[0, -2] # returns no rows and every column name but the second, in this case A C
+
+a[1,1] #returns first column entry of first row
+```
+
+```{r}
+# Data frames and tibbles!
+
+df <- data.frame(x = 1:3, y = 3:1, z = letters[1:3])
+
+df[df$x == 2, ] # selects second column
+
+df[2,] # does the same thing just much simpler and selects all columns
+
+df[c(1, 3), ] # selects first and third rows and all columns
+
+
+# the 3 ways to select columns
+
+# like a list
+df[c("x", "z")] 
+# like a matrix
+df[, c("x", "z")]
+#by index as a matrix
+df[,c(1,3)]
+
+# importantly list subsetting does not simplify the output. This will tell you infor about a dataframe
+str(df["x"])
+
+# this will tell you info about a vector
+str(df[, "x"])
+
+# you can use drop = FALSE to avoid dropping dimensions
+# the default of drop = T is often a bug in functions
+
+str(df[, "x", drop = FALSE])
+
+```
+
+Exercises for subsetting
+
+```{r}
+data(mtcars)
+```
+
+```{r}
+# fix the errors in these subsetting mistakes
+-----
+mtcars[mtcars$cyl = 4, ]
+# fix
+mtcars[mtcars$cyl == 4, ]
+------
+
+------
+mtcars[-1:4, ]
+# fix
+mtcars[-(1:4),]
+------
+  
+------
+mtcars[mtcars$cyl <= 5]
+# fix
+mtcars[mtcars$cyl <= 5,]
+------
+  
+------
+mtcars[mtcars$cyl == (4 | 6), ]
+# fix
+mtcars[mtcars$cyl %in% c(4,6), ]
+
+
+```
+
+Using [[]] and $
+
+
+difference between [[]] and []
+  -If list x is a train carrying objects, then x[[5]] is the object in car 5; x[4:6] is a train of cars 4-6.
+
+in other words you can either choose a smaller train or a specific item on a train!
+
+
+```{r}
+# another indexing option
+
+x <- list(
+  a = list(1, 2, 3),
+  b = list(3, 4, 5)
+)
+
+purrr::pluck(x, "a", 1)
+
+```
+
+# exercises
+
+Brainstorm as many ways as possible to extract the third value from the cyl variable in the mtcars dataset.
+
+```{r}
+# some options
+mtcars$cyl[[3]]
+
+mtcars[3,2]
+
+mtcars[3, "cyl"]
+
+mtcars[[c(2,3)]]
+```
+
+
+Given a linear model, extract the residual degrees of freedom. Then extract the R squared from the model summary (summary(mod))
+
+```{r}
+mod <- lm(mpg ~ wt, data = mtcars)
+```
+
+```{r}
+names(mod)
+
+# these both do the job
+mod$df.residual
+
+mod[["df.residual"]]
+
+#rsq
+
+names(summary(mod)) # just to check name
+
+summary(mod)$r.squared
+
+summary(mod)[["r.squared"]]
+```
+
 
 
 
