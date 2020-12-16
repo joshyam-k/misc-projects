@@ -229,6 +229,109 @@ summary(mod)$r.squared
 summary(mod)[["r.squared"]]
 ```
 
+Subsetting and assignment
+
+```{r}
+x <- 1:5
+x[c(1, 2)] <- c(101, 102) # changes the first and second entries to be 101 and 102
+
+```
+
+```{r}
+#lists
+
+x <- list(a = 1, b = 2)
+x[["b"]] <- NULL # you can remove an element from a list by assignign null to it
+str(x)
+
+
+```
+
+Applications
+
+```{r}
+# matching and merging
+
+grades <- c(1, 2, 2, 3, 1)
+
+info <- data.frame(
+  grade = 3:1,
+  desc = c("Excellent", "Good", "Poor"),
+  fail = c(F, F, T)
+)
+
+id <- match(grades, info$grade)
+info[id, ]
+```
+
+```{r}
+# random samples and bootstraping
+
+df <- data.frame(
+  x = c(1, 2, 3, 1, 2),
+  y = 5:1,
+  z = letters[1:5]
+  )
+
+# shuffle rows
+
+df[sample(nrow(df)),]
+
+# Select 3 random rows
+df[sample(nrow(df), 3), ]
+
+
+# Select 6 bootstrap replicates
+df[sample(nrow(df), 6, replace = TRUE), ]
+
+```
+
+
+```{r}
+#ordering
+
+x <- c("b", "c", "a")
+order(x)
+
+x[order(x)]
+
+```
+
+practice problems
+
+How would you randomly permute the columns of a data frame? (This is an important technique in random forests.) Can you simultaneously permute the rows and columns in one step?
+
+```{r}
+df <- data.frame(
+  x = c(1, 2, 3, 1, 2),
+  y = 5:1,
+  z = letters[1:5]
+  )
+
+df[,sample(ncol(df))] # permute columns
+
+df[sample(nrow(df)), sample(ncol(df))] # permute rows and columns
+```
+
+How would you select a random sample of m rows from a data frame? What if the sample had to be contiguous (i.e., with an initial row, a final row, and every row in between)?
+
+```{r}
+df <- data.frame(
+  x = c(1, 2, 3, 1, 2),
+  y = 5:1,
+  z = letters[1:5]
+  )
+
+df[sample(nrow(df),m), ] # selecting a random sample of m rows
+
+start <- sample(nrow(df) - m + 1, 1) # selection some starting point relative to m rows
+end <- start + m -1 # specifying the end index
+
+df[start:end, drop = F]
+```
+
+If x is a matrix, x[] <- 0 will replace every element with 0, keeping the same number of rows and columns. In contrast, x <- 0 completely replaces the matrix with the value 0.
+
 
 
 
