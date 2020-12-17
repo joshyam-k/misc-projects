@@ -402,7 +402,40 @@ cmd + shift + m is pipe %>%
 option + - is arrow <-
 
 
+# Functions
+
+A function has three parts:
+
+  - The formals(), the list of arguments that control how you call the function.
+
+  - The body(), the code inside the function.
+
+  - The environment(), the data structure that determines how the function finds the values associated with the     names.
+
+```{r}
+f02 <- function(x, y) {
+  # A comment
+  x + y
+}
+
+formals(f02)
 
 
+body(f02)
 
+
+environment(f02)
+
+```
+
+a pretty useful way to look at the makeup of a function
+
+```{r}
+attr(f02, "srcref")
+
+#> function(x, y) {
+#>   # A comment
+#>   x + y
+#> }
+```
 
