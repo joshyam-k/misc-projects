@@ -353,6 +353,7 @@ x_option <- function(x) {
   }
 }
 
+# switch should only really be used for character values of x
 x_option_improved <- function(x) {
   switch(x,
     a = "option 1",
@@ -363,5 +364,45 @@ x_option_improved <- function(x) {
 }
 # the last component of switch should always throw an error
 ```
+
+
+If multiple inputs have the same output, you can leave the right hand side of = empty and the input will “fall through” to the next value.  
+
+```{r}
+legs <- function(x) {
+  switch(x,
+    cow = ,
+    horse = ,
+    dog = 4,
+    human = ,
+    chicken = 2,
+    plant = 0,
+    stop("Unknown input")
+  )
+}
+legs("cow") # outputs 4
+
+legs("dog") # outputs 4
+
+legs("chicken") # outputs 2
+
+```
+
+Exercises
+
+```{r}
+#what do these output? 
+ifelse(TRUE, 1, "no") # 1
+ifelse(FALSE, 1, "no") # no
+ifelse(NA, 1, "no") # NA 
+
+```
+
+cmd + shift + m is pipe %>%
+option + - is arrow <-
+
+
+
+
 
 
