@@ -439,3 +439,99 @@ attr(f02, "srcref")
 #> }
 ```
 
+
+Lexical scoping
+
+```{r}
+x <- 10
+g01 <- function() {
+  x <- 20
+  x
+}
+
+g01()
+```
+
+```{r}
+x <- 1
+g04 <- function() {
+  y <- 2
+  i <- function() {
+    z <- 3
+    c(x, y, z)
+  }
+  i()
+}
+g04() # outputs 1,2,3
+```
+
+ R looks for values when the function is run, not when the function is created.
+
+```{r}
+c <- 10
+c(c = c)
+```
+
+What does this do?
+
+```{r}
+f <- function(x) {
+  f <- function(x) {
+    f <- function() {
+      x ^ 2
+    }
+    f() + 1
+  }
+  f(x) * 2
+}
+f(10) # 202
+```
+
+```{r}
+args(sample) # a cool way to check arguments of a function, notice no ()
+```
+
+```{r}
+sample1 <- function(x, size = NULL, replace = FALSE, prob = NULL) {
+  if (is.null(size)) {
+    size <- length(x)
+  }
+  
+  x[sample.int(length(x), size, replace = replace, prob = prob)]
+}
+
+sample1(1:20)
+sample(1:20)
+```
+
+&& does not perform elementwise comparisons, instead it uses the first element of each value only
+
+
+```{r}
+f2 <- function(x = z) {
+  z <- 100
+  x
+}
+f2()
+```
+
+```{r}
+y <- 10
+f1 <- function(x = {y <- 1; 2}, y = 0) {
+  c(x, y)
+}
+f1()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
