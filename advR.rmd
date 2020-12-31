@@ -447,32 +447,76 @@ sapply(mtcars, function(x) length(unique(x)))
 ```
 
 
+```{r}
+match.fun(mean)
+```
+
 Lexical scoping
 
+-four primary rules it follows
+
 ```{r}
+# Name Masking
+#   -names defined inside a function mask names defined outside a function
+
 x <- 10
-g01 <- function() {
-  x <- 20
-  x
+y <- 20
+g02 <- function() {
+  x <- 1
+  y <- 2
+  c(x, y)
 }
+g02() # outputs 1 2 not 10 20
 
-g01()
+# If a name isn’t defined inside a function, R looks one level up.
+
+x <- 2
+g03 <- function() {
+  y <- 1
+  c(x, y)
+}
+g03() # outputs 2 1 and importantly
+
+y # ouputs 20 which was the old value for y
 ```
 
 ```{r}
-x <- 1
-g04 <- function() {
-  y <- 2
-  i <- function() {
-    z <- 3
-    c(x, y, z)
-  }
-  i()
+# Functions vs variables
+
+# the same scoping rules apply to functions as well as objects
+
+g09 <- function(x) x + 100
+g10 <- function() {
+  g09 <- 10
+  g09(g09)
 }
-g04() # outputs 1,2,3
+g10() # this outputs 110 because we have both an object and a function defined as g09
+
 ```
 
- R looks for values when the function is run, not when the function is created.
+```{r}
+# A fresh start
+
+#every time a function is called a new environment is created to host its execution. This means that a function #has no way to tell what happened the last time it was run; each invocation is completely independent.
+```
+
+```{r}
+# dynamic lookup
+
+# R looks for values when the function is run, not when the function is created
+
+g12 <- function() x + 1
+x <- 15
+g12() # outputs 16
+
+
+x <- 20
+g12() # outputs 21, because we assigned 20 to x before running the function again
+
+
+
+```
+
 
 ```{r}
 c <- 10
@@ -493,6 +537,8 @@ f <- function(x) {
 }
 f(10) # 202
 ```
+
+
 
 ```{r}
 args(sample) # a cool way to check arguments of a function, notice no ()
