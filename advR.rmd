@@ -538,7 +538,38 @@ f <- function(x) {
 f(10) # 202
 ```
 
+Lazy evaluation
 
+```{r}
+# promises
+
+# three components
+
+# an expression which gives rise to delayed computation
+# an environment where the expression should be evaluated
+#   This also means that when you do assignment inside a call to a function, the variable is bound outside of the
+#   function, not inside of it.
+# A value, which is computed and cached the first time a promise is accessed when the expression is evaluated in
+# the specified environment.
+```
+
+```{r}
+# default arguments
+
+h04 <- function(x = 1, y = x * 2, z = a + b) {
+  a <- 10
+  b <- 100
+  
+  c(x, y, z)
+}
+
+h04() # outputs 1 2 110 this shows off default values that we set ourselves
+
+
+# missing arguments
+
+
+```
 
 ```{r}
 args(sample) # a cool way to check arguments of a function, notice no ()
