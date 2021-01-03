@@ -590,6 +590,11 @@ sample(1:20)
 
 && does not perform elementwise comparisons, instead it uses the first element of each value only
 
+```{r}
+attr(sample, "srcref")
+args(sample)
+```
+
 
 ```{r}
 f2 <- function(x = z) {
@@ -608,6 +613,24 @@ f1()
 
 ```
 
+```{r}
+# dot-dot-dot ...
+
+i04 <- function(...) {
+  list(...)
+}
+
+i04(a = 1, b = 2, j = "jack") # just an example
+
+# the primary uses of ...
+
+#If your function takes a function as an argument, you want some way to pass additional arguments to that #function.
+
+# some downsides, a misspelled argument will not cause an error
+
+sum(1,2,3,NA, na_rm = T) # returns NA since we typed na_rm not na.rm
+
+```
 
 
 
