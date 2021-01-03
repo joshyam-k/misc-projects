@@ -830,9 +830,75 @@ env_poke1(e3, "w", 200) # Error: "w" is already assigned to a value
 
 ```{r}
 # recursion over environments
+
+# This section shows you how, applying your new knowledge of environments to write a function that given a name,
+# finds the environment where() that name is defined, using R’s regular scoping rules.
+
+where <- function(name, env = caller_env()) { 
+  # default is caller_env() for the environment to start in
+  # The caller environment is the execution environment of the function that called the current function.
+  if (identical(env, empty_env())) {
+    # checking to see if the env is the empty environment
+    # Base case
+    stop("Can't find ", name, call. = FALSE)
+  } else if (env_has(env, name)) {
+    # Success case
+    env
+  } else {
+    # Recursive case
+    # looks at the parent of env to continue
+    where(name, env_parent(env))
+  }
+}
+
+# this function is really nice because it checks each successive parent environment until it finds which environment the value lives in
+
+where("yyy")
+# Error: Can't find yyy
+
+x <- 5
+where("x")
+# <environment: R_GlobalEnv>
+
+where("mean")
+# <environment: base>
+
+
+
 ```
 
+```{r}
+# exercises
 
+# Modify where() to return all environments that contain a binding for name. Carefully think through what type of
+# object the function will need to return.
+
+where2 <- function(name, env = caller_env(), results = list()) {
+  if (identical(env, empty_env())) {
+    # Base case
+    results
+  } else {
+    # Recursive case
+    if (env_has(env, name)) {
+      results <- c(results, env)
+    }
+    where2(name, env_parent(env), results)
+  }
+}
+
+e1a <- env(empty_env(), a = 1, b = 2)
+e1b <- env(e1a, b = 10, c = 11)
+e1c <- env(e1b, a = 12, d = 13)
+
+where2("a", e1c)
+
+```
+
+```{r}
+# special environments
+
+# Most environments are not created by you (e.g. with env()) but are instead created by R
+```
 
 
 
