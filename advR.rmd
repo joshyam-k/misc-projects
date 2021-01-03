@@ -698,7 +698,27 @@ env_names(e1)
 ```
 
 
+```{r}
+# important environments
 
+current_env()
+
+global_env()
+
+identical(current_env(), global_env()) # outputs TRUE
+```
+
+```{r}
+# parents
+
+# every environment has a parent, another environment
+# if a name is not found in an environment R will look to the parent and so on
+
+e2a <- env(d = 4, e = 5)
+e2b <- env(e2a, a = 1, b = 2, c = 3)
+
+env_print(e2a)
+```
 
 
 
