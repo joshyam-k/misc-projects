@@ -718,7 +718,122 @@ e2a <- env(d = 4, e = 5)
 e2b <- env(e2a, a = 1, b = 2, c = 3)
 
 env_print(e2a)
+
+# you can find the parent of an environment with
+env_parent(e2b)
+env_parent(e2a) # R_GlobalEnv
+env_parents(e2b) # shows entire ancestry, this stops at the global environment
+
+# the empty environment has no parent
+
+env_parent(empty_env()) # Error the environment has no parent
+
+env_parents(e2b, last = empty_env()) # we can override stopping at the global environment as follows
+# this shows every package too
+
 ```
+
+
+```{r}
+# super assignment <<-
+
+# Regular assignment, <-, always creates a variable in the current environment. Super assignment, <<-, never
+# creates a variable in the current environment, but instead modifies an existing variable found in a parent
+# environment.
+
+x <- 0
+f <- function() {
+  x <- 1
+}
+f()
+x
+
+# in this case when we run the function and then check on x again we see that it still has the value 0
+y <- 0
+g <- function() {
+  y <<- 1
+}
+g()
+y
+# now when we run the function the value y has been replaced to be 1, this outputs 1 not 0
+
+# if <<- doesn't find an existing variable it will create one in the global environment
+
+```
+
+
+```{r}
+# getting and setting
+
+e3 <- env(x = 1, y = 2)
+e3$x # outputs 1
+
+e3$z <- 3
+env_print(e3) # this shows a z value now
+e3$z # outputs 3
+
+e3[["z"]] # outputs 3
+
+# but you cant use numeric indices, you also can't use []
+
+# two other ways to add bindings to an environment
+
+env_poke(e3, "a", 100)
+e3$a # outputs 100
+
+env_bind(e3, a = 10, b = 20)
+env_names(e3) # outputs x y z a b
+
+# to remove bindings
+
+env_unbind(e3, "a")
+env_print(e3) # now a no longer exists in this environment
+
+
+```
+
+```{r}
+# advanced bindings
+
+env_bind_active(current_env(), z1 = function(val) runif(1))
+z1 
+z1 # these output a new value each time theyre accessed
+
+```
+
+
+```{r}
+# exercises
+
+# 1
+e1 <- env(
+  loop = e1
+)
+
+# Create a version of env_poke() that will only bind new names, never re-bind old names. Some programming
+# languages only do this, and are known as single assignment languages.
+
+env_poke1 <- function(env, name, value){
+  if (env_has(env, name)) {
+    abort(paste0("\"", name, "\" is already assigned to a value."))
+  }
+  env_poke(env, name, value)
+  invisible(env) 
+}
+
+# lets test it
+env_poke1(e3, "w", 100)
+e3$w # 100
+
+env_poke1(e3, "w", 200) # Error: "w" is already assigned to a value
+```
+
+```{r}
+# recursion over environments
+```
+
+
+
 
 
 
