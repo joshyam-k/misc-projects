@@ -633,7 +633,46 @@ sum(1,2,3,NA, na_rm = T) # returns NA since we typed na_rm not na.rm
 ```
 
 
+```{r}
+args(mean)
 
+sum(1, 2, 3, na.omit = TRUE) # returns 7 because we wrote na.omit instead of na.rm and so the T is read as 1
+
+# lets look at the arguments
+
+str(sum) # we can see that the first arguments are ... and the other is the status of na.rm, so we can do
+sum(1,2,3,4)
+
+str(mean) # here we can see that x is the first argument and the rest is ... so we cant do 
+mean(1,2,3)
+# instead we do
+mean(c(1,2,3))
+
+str(plot)
+```
+
+```{r}
+# exiting a function
+
+# Most functions exit in one of two ways: they either return a value, indicating success, or they throw an
+# error, indicating failure
+
+# implicit vs explicit
+
+## implicitly, where the last evaluated expression is the return value:
+## Explicitly, by calling return()
+
+# invisible values
+
+j03 <- function() 1
+j03() # usually it works like this where just calling the function prints an output
+
+# but we can also do this to prevent the output from being printed
+j04 <- function() invisible(1)
+j04() # this outputs nothing
+
+# the most common usage of invisible functions is the <-, for ex a <- 1 doesnt output anything
+```
 
 
 
