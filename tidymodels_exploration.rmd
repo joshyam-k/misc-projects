@@ -135,11 +135,63 @@ library(textrecipes)
 
 
 rec <- recipe(aang ~ text, data = train) %>% 
-  step_downsample(aang)
+  step_downsample(aang) %>% 
+  step_textfeature(text) %>% 
+  step_zv(all_predictors()) %>% 
+  step_normalize(all_predictors())
+
+# prepping and juicing is sort of like doing all of the steps described in the recipe so you can see
+# what it looks like
+prep <- prep(rec)
+juice(prep)
 ```
 
 
+```{r}
+# models 
 
+rf_spec <- rand_forest(
+  trees = 1000
+) %>% 
+  set_engine("ranger") %>% 
+  set_mode("classification")
+
+svm_spec <- svm_rbf(
+  cost = 0.5
+) %>% 
+  set_engine("kernlab") %>% 
+  set_mode("classification")
+
+
+avatar_wf <- workflow() %>% 
+  add_recipe(rec)
+
+doParallel::registerDoParallel()
+
+set.seed(100)
+rf_rs <- avatar_wf %>% 
+  add_model(rf_spec) %>% 
+  fit_resamples(
+    resamples = folds,
+    metric = metric_set(roc_auc, accuracy, sens, spec),
+    control = control_resamples(save_pred = T)
+  )
+
+svm_rs <- avatar_wf %>% 
+  add_model(svm_spec) %>% 
+  fit_resamples(
+    resamples = folds,
+    metric = metric_set(roc_auc, accuracy, sens, spec),
+    control = control_resamples(save_pred = T)
+  )
+```
+
+```{r}
+collect_metrics(rf_rs)
+conf_mat_resampled(rf_rs)
+
+collect_metrics(svm_rs)
+```
 
 
 
