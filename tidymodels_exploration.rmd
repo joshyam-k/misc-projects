@@ -193,6 +193,21 @@ conf_mat_resampled(rf_rs)
 collect_metrics(svm_rs)
 ```
 
+## evaluate models
+
+```{r}
+svm_rs %>% 
+  collect_predictions() %>% 
+  group_by(id) %>% 
+  roc_curve(aang, .pred_Aang) %>% 
+  ggplot(aes(1- specificity, sensitivity, color = id)) +
+  geom_abline(lty = 2, color = "black", alpha = 0.7 , size = 1) +
+  geom_path(show.legend = F, alpha = 0.7, size = 1.2) +
+  coord_equal()
+  
+```
+
+
 
 
 
