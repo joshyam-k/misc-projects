@@ -927,7 +927,110 @@ g(10)
 
 ```{r}
 library(rlang)
+
+# signaling conditions
+
+# errors, warnings, and messages
+
+stop("This is what an error looks like")
+#> Error in eval(expr, envir, enclos): This is what an error looks like
+
+warning("This is what a warning looks like")
+#> Warning: This is what a warning looks like
+
+message("This is what a message looks like")
+#> This is what a message looks like
 ```
+
+Errors:
+
+```{r}
+h <- function() stop("this is an error!")
+h() # Error in h() : this is an error!
+
+# if we don't want "in h()" use
+j <- function() stop("this is an error!", call. = F)
+j() # Error: this is an error!
+
+# we can just use abort() to fix this
+
+m <- function() abort("no no no")
+m() # you can use glue to create more complex error messages
+
+```
+
+Warnings:
+
+```{r}
+fw <- function() {
+  cat("1\n")
+  warning("W1")
+  cat("2\n")
+  warning("W2")
+  cat("3\n")
+  warn("W3") # warn() can also be used (its in rlang)
+}
+
+fw()
+```
+
+Messages:
+
+```{r}
+# message()s are displayed immediately and do not have a call. argument
+
+fm <- function() {
+  cat("1\n")
+  message("M1")
+  cat("2\n")
+  message("M2")
+  cat("3\n")
+  message("M3")
+}
+
+fm() # check output to see how message works
+```
+
+```{r}
+# exercises
+
+file_remove <- function(file){
+  if (!file.exists(file)){
+    stop("Can't delete the file \"", file,
+          "\"because it doesn't exist",
+         call. = F)
+  }
+  file.remove(file)
+}
+
+saveRDS(mtcars, "mtcars.rds")
+file_remove("mtcars.rds")
+#> [1] TRUE
+file_remove("mtcars.rds")
+# Error: Can't delete the file "mtcars.rds"because it doesn't exist
+
+
+# what does appendLF do in the message function
+
+k <- function(){
+  message("what", appendLF = T)
+  message("is", appendLF = T)
+  message("that", appendLF = T)
+}
+
+k() # it creates a new line
+```
+
+
+Ignoring conditions
+
+  - Ignore errors with try().
+  - Ignore warnings with suppressWarnings().
+  - Ignore messages with suppressMessages().
+
+
+
+
 
 
 
