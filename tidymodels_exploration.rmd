@@ -27,3 +27,121 @@ ames <-
   mutate(Sale_Price = log10(Sale_Price))
 ```
 
+-------------------------------------------------------------------------------------------------------------
+
+Build a predictive text model for Avatar
+
+```{r}
+# load packages
+library(tidyverse)
+library(tidymodels)
+library(tidytuesdayR)
+library(tidytext)
+```
+
+```{r}
+# get the data
+
+dat <- tt_load(2020, week = 33)
+avatar_raw <- dat$avatar
+
+theme_set(theme_minimal())
+```
+
+
+```{r}
+# looking at data
+
+avatar_raw %>% 
+  count(character, sort = T) # 374 total rows...
+
+
+# how many lines are spoken by these characters in the 3 books
+avatar_raw %>% 
+  filter(!is.na(character_words)) %>% 
+  mutate(book = fct_inorder(book),
+         character = fct_lump_n(character, 10)) %>% 
+  count(book, character) %>% 
+  mutate(character = reorder_within(character, n, book)) %>% 
+  ggplot(aes(n, character, fill = book)) +
+  geom_col() +
+  facet_wrap(~ book, scales = "free") +
+  scale_y_reordered() +
+  labs(y = "",
+       x = "number of words spoken")
+
+# creating the df
+
+avatar <- avatar_raw %>% 
+  filter(!is.na(character_words)) %>% 
+  mutate(aang = if_else(character == "Aang", "Aang", "Other")) %>% 
+  select(aang, book, text = character_words)
+
+```
+
+```{r}
+library(tidylo)
+avatar_lo <- avatar %>% 
+  unnest_tokens(word, text) %>% 
+  count(aang, word) %>% 
+  bind_log_odds(aang, word, n) %>% 
+  arrange(desc(log_odds_weighted))
+
+avatar_lo %>% 
+  group_by(aang) %>% 
+  slice_max(log_odds_weighted, n = 15) %>% 
+  ungroup() %>% 
+  mutate(word = reorder(word, log_odds_weighted)) %>% 
+  ggplot(aes(log_odds_weighted, word, fill = aang)) + 
+  geom_col(alpha = 0.8) +
+  facet_wrap(~aang, scales = "free")
+```
+
+```{r}
+library(textfeatures)
+
+tf <- textfeatures(avatar, sentiment = F, word_dims = 0, normalize = F)
+
+# looking at other features of the text
+tf %>% 
+  bind_cols(avatar) %>% 
+  group_by(aang) %>% 
+  summarise(across(starts_with("n_"), mean)) %>% 
+  pivot_longer(starts_with("n_"), names_to = "text_feature", values_to = "val") %>% 
+  filter(val > 0.01) %>% 
+  mutate(text_feature = fct_reorder(text_feature, val)) %>% 
+  ggplot(aes(aang, val, fill = aang)) +
+  geom_col(position = "dodge", alpha = 0.8, show.legend = F) +
+  facet_wrap(~ text_feature, scales = "free") +
+  labs(y = "Mean text features per spoken line", x = "")
+  
+```
+
+## building models
+
+```{r}
+set.seed(145)
+init <- initial_split(avatar, strata = aang)
+train <- training(init)
+test <- testing(init)
+
+set.seed(455)
+folds <- vfold_cv(train, strata = aang, v = 10)
+```
+
+```{r}
+library(themis)
+library(textrecipes)
+
+
+rec <- recipe(aang ~ text, data = train) %>% 
+  step_downsample(aang)
+```
+
+
+
+
+
+
+
+
