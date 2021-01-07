@@ -896,10 +896,38 @@ where2("a", e1c)
 
 ```{r}
 # special environments
-
 # Most environments are not created by you (e.g. with env()) but are instead created by R
+search()
+search_envs()
+
+# namespaces
+# every package works the same way regardless of what packages are attached by the user.
+
+#ex
+sd # notice it lives in the namespace:stats environment
+
+# Each time a function is called, a new environment is created to host execution
+
+g <- function(x) {
+  if (!env_has(current_env(), "a")) {
+    message("Defining a")
+    a <- 1
+  } else {
+    a <- a + 1
+  }
+  a
+}
+
+g(10) # these output the same thing becayse a new environment is created to host execution each time it is run
+g(10)
+
 ```
 
+### Conditions
+
+```{r}
+library(rlang)
+```
 
 
 
