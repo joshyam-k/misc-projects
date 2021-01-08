@@ -1028,7 +1028,57 @@ Ignoring conditions
   - Ignore warnings with suppressWarnings().
   - Ignore messages with suppressMessages().
 
+```{r}
+#try()
 
+f1 <- function(x) {
+  log(x)
+  10
+}
+f1("x")
+# Error in log(x): non-numeric argument to mathematical function
+
+f2<- function(x) {
+  try(log(x))
+  10
+}
+f2("x") # 10
+
+# a useful trick is to use assignment inside of the call
+
+# as you can see here we only assign default to be something else if the code runs without an error!
+default <- NULL
+try(default <- read.csv("possibly-bad-input.csv"), silent = TRUE)
+
+```
+
+```{r}
+# condition objects
+
+cnd <- catch_cnd(stop("An error"))
+str(cnd)
+
+#> List of 2
+#>  $ message: chr "An error"
+#>  $ call   : language force(expr)
+#>  - attr(*, "class")= chr [1:3] "simpleError" "error" "condition"
+```
+
+```{r}
+#exiting handlers
+# tryCatch() registers exiting handlers, and is typically used to handle error conditions. It allows you to
+# override the default error behaviour.
+
+f3 <- function(x) {
+  tryCatch(
+    error = function(cnd) NA,
+    log(x)
+  )
+}
+
+f3("x") #NA, allows you to overide an error message as you want
+
+```
 
 
 
