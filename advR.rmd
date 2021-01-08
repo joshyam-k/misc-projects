@@ -1265,6 +1265,8 @@ my_log(1:10, base = letters)
 ```
 
 ```{r}
-# signaling
+# applications
+
+
 ```
 
