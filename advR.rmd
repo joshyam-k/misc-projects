@@ -1193,6 +1193,78 @@ y <- lapply(urls, readUrl)
 ```
 
 
+Exercises
 
+```{r}
+# predict outputs of this function
+show_condition <- function(code) {
+  tryCatch(
+    error = function(cnd) "error",
+    warning = function(cnd) "warning",
+    message = function(cnd) "message",
+    {
+      code
+    }
+  )
+}
 
+show_condition(stop("!"))
+# outputs "error" since we entered an error lol
+
+show_condition(10)
+# outputs 10 since no condition is signaled
+
+show_condition(warning("?!"))
+# outputs "warning" since we triggered a warning
+
+show_condition({
+  10
+  message("?")
+  warning("?!")
+})
+# just outputs "message" because it termiantes as soon as it's called
+```
+
+```{r}
+# custom conditions
+
+abort(
+  "error_not_found", # name of the type of error
+  message = "Path `blah.csv` not found", # user facing text
+  path = "blah.csv" # custom metadata
+)
+# Error: Path `blah.csv` not found
+
+# lets look at the log functions errors to get a  sense of where this is useful
+
+log(letters)
+#> Error in log(letters): non-numeric argument to mathematical function
+log(1:10, base = letters)
+#> Error in log(1:10, base = letters): non-numeric argument to mathematical function
+
+# lets write a new function
+
+my_log <- function(x, base = exp(1)){
+  if (!is.numeric(x)){
+    abort(
+      paste0("`x` must be a numeric vector, not ", type_of(x), ".")
+    )
+  }
+  if (!is.numeric(base)){
+    abort(
+      paste0("`base` must be a numeric vector not ", type_of(base), ".")
+    )
+  }
+  base::log(x, base = base)
+}
+
+my_log(letters)
+# Error: `x` must be a numeric vector, not character.
+my_log(1:10, base = letters)
+# Error: `base` must be a numeric vector, not character.
+```
+
+```{r}
+# signaling
+```
 
