@@ -1065,6 +1065,17 @@ str(cnd)
 ```
 
 ```{r}
+# tryCatch()
+
+tryCatch(
+  error = function(cnd) {
+    # code to run when error is thrown
+  },
+  code_to_run_while_handlers_are_active
+)
+
+# tryCatch() defines exiting handlers; after the condition is handled, control returns to the context where tryCatch() was called. This makes tryCatch() most suitable for working with errors and interrupts, as these have to exit anyway
+
 #exiting handlers
 # tryCatch() registers exiting handlers, and is typically used to handle error conditions. It allows you to
 # override the default error behaviour.
@@ -1078,9 +1089,108 @@ f3 <- function(x) {
 
 f3("x") #NA, allows you to overide an error message as you want
 
+tryCatch(
+  error = function(cnd) {
+    paste0("--", conditionMessage(cnd), "--")
+  },
+  stop("This is an error")
+) # "--This is an error--"
+
 ```
 
+From what I can understand, inside of tryCatch() you use brackets to specify what to do in the case of messages, warnings, and errors
+```{r}
+# calling handlers
 
+tryCatch(
+  message = function(cnd) cat("Caught a message!\n"), 
+  {
+    message("Someone there?")
+    message("Why, yes!")
+  }
+) # Caught a message! 
+
+
+```
+
+```{r}
+# i find this example of tryCatch to be especially helpful
+
+# we want our function to read a vector of urls, but we dont want it to only output an error when it comes
+# across an invalid url, instead we want it to keep working and then print information about that error
+# at the end
+
+urls <- c(
+    "http://stat.ethz.ch/R-manual/R-devel/library/base/html/connections.html",
+    "http://en.wikipedia.org/wiki/Xz",
+    "xxxxx"
+)
+
+readUrl <- function(url) {
+    out <- tryCatch(
+        {
+            # 'tryCatch()' will return the last evaluated expression 
+            # in case the "try" part was completed successfully
+
+            message("This is the 'try' part")
+
+            readLines(con = url, warn=FALSE) 
+            # The return value of `readLines()` is the actual value 
+            # that will be returned in case there is no condition 
+            # (e.g. warning or error). 
+            # You don't need to state the return value via `return()` as code 
+            # in the "try" part is not wrapped inside a function (unlike that
+            # for the condition handlers for warnings and error below)
+        },
+        error = function(cond) { 
+            # this is specifying what to do in the case of an error
+            message(paste("URL does not seem to exist:", url))
+            message("Here's the original error message:")
+            message(cond)
+            # Choose a return value in case of error
+            return(NA)
+        },
+            # this is specifying what to do in case of a warning
+        warning = function(cond) {
+            message(paste("URL caused a warning:", url))
+            message("Here's the original warning message:")
+            message(cond)
+            # Choose a return value in case of warning
+            return(NULL)
+        },
+        finally={
+        # NOTE:
+        # Here goes everything that should be executed at the end,
+        # regardless of success or error.
+        # If you want more than one expression to be executed, then you 
+        # need to wrap them in curly brackets ({...}); otherwise you could
+        # just have written 'finally=<expression>' 
+            message(paste("Processed URL:", url))
+            message("Some other message at the end")
+        }
+    )    
+    return(out)
+}
+
+
+# lets test it
+y <- lapply(urls, readUrl)
+
+# This is the 'try' part
+# Processed URL: http://stat.ethz.ch/R-manual/R-devel/library/base/html/connections.html
+# Some other message at the end
+# This is the 'try' part
+# Processed URL: http://en.wikipedia.org/wiki/Xz
+# Some other message at the end
+# This is the 'try' part
+# URL caused a warning: xxxxx
+# Here's the original warning message:
+# cannot open file 'xxxxx': No such file or directoryProcessed URL: xxxxx
+# Some other message at the end
+
+
+# so cool!!!
+```
 
 
 
