@@ -10,6 +10,20 @@ library(lobstr)
 ```
 
 ```{r}
+df <- data.frame(runif(3), runif(3))
+names(df) <- c(1, 2)
+
+# add a column called 3 that is the sum of columns `1` and `2`
+df$`3` <- df$`1` + df$`2`
+```
+
+```{r}
+x <- list(1:10)
+x[[2]] <- x
+# there is no second item in the list so a new item is created and set to be that list copied
+```
+
+```{r}
 x <- c(1,2,3)
 y <- x
 y[[3]] <- 4 # modifies 3rd object in vector
