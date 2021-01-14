@@ -60,6 +60,18 @@ x <- 1:3
 names(x) <- c("a", "b", "c")
 ```
 
+```{r}
+x1 <- array(1:5, c(1, 1, 5)) # 1x1x5 3d object with 1 row 1 column and 5 different other layers
+x2 <- array(1:5, c(1, 5, 1)) # 1x5x1 2d object with 1 row and 5 columns
+x3 <- array(1:5, c(5, 1, 1)) # 5x1x1 2d object with 5 rows and 1 column
+```
+
+```{r}
+# factors
+x <- factor(c("a", "b", "b", "a"))
+x # includes Levels: a b
+```
+
 
 ## subsetting
 
