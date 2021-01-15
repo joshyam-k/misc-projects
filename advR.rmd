@@ -262,7 +262,6 @@ c() # NULL
 
 ## subsetting
 
-using [ always returns the same object as is being modified
 
 ```{r}
 x <- c(1,2,3,4,5)
@@ -315,6 +314,15 @@ a[1,1] #returns first column entry of first row
 ```
 
 ```{r}
+# lists
+
+# using [] will return a list and using [[]] or $ will return an item from the list
+
+a <- list(list("a","b"), 1:3)
+a[[1]][[1]] # so we are selecting the list at first and second we are selecting the first element in the list
+```
+
+```{r}
 # Data frames and tibbles!
 
 df <- data.frame(x = 1:3, y = 3:1, z = letters[1:3])
@@ -345,6 +353,41 @@ str(df[, "x"])
 # the default of drop = T is often a bug in functions
 
 str(df[, "x", drop = FALSE])
+ 
+# subsetting a tibble with [] always returns a tibble which is a really nice feature, avoid dimensionality drops
+```
+
+```{r}
+# matrices
+
+# Because both matrices and arrays are just vectors with special attributes, you can subset them with a single
+# vector, as if they were a 1D vector. Note that arrays in R are stored in column-major order:
+vals <- outer(1:5, 1:5, FUN = "paste", sep = ",")
+vals
+
+vals[c(4,15)] # if you were to lay out the matrix in column major order so the first column followed by 
+# the second columna and then count the indices youd get that output using this code
+# in this case it is "4,1" "5,3"
+
+```
+
+```{r}
+# preserving dimensionality
+
+# Data frames with a single column will return just the content of that column:
+df <- data.frame(a = 1:2, b = 1:2)
+str(df) # `data.frame`
+str(df[, "a"]) # now when we subset a single column we lose dimension
+#>  int [1:2] 1 2
+
+# we can avoid this by using a tibble or by doing
+str(df[, "a", drop = FALSE]) # `data.frame`
+
+# if not using a tibble, When writing functions, get in the habit of always using drop = FALSE when subsetting a
+# 2D object. 
+```
+
+```{r}
 
 ```
 
@@ -379,7 +422,46 @@ mtcars[mtcars$cyl == (4 | 6), ]
 # fix
 mtcars[mtcars$cyl %in% c(4,6), ]
 
+# why does the following return all NA
 
+x <- 1:5
+x[NA] # NA NA NA NA NA
+#  In contrast to NA_real, NA has logical type and logical vectors are recycled to the same length as the
+# vector being subset, i.e. x[NA] is recycled to x[NA, NA, NA, NA, NA]
+
+# what does upper.tri do?
+x <- outer(1:5, 1:5, FUN = "*") # this creates a matrix
+x[upper.tri(x)] # takes the upper triangle of the matrix not including the line of symmetry
+
+# Why does mtcars[1:20] return an error? How does it differ from the similar mtcars[1:20, ]?
+
+mtcars[1:20] # this would return the first 20 columns but there are only 11
+# its only when we use mtcars[1:20, ] that the 1:20 will refer to rows and not columns
+
+# write a function to pull diagonal values in a matrix
+
+diags <- function(matrix){
+  vals <- c()
+  for (i in 1:nrow(matrix)){
+    vals[i] <- matrix[i,i]
+  }
+  vals
+}
+diags(x) # lol this works!
+
+# alternatively
+
+diag2 <- function(x) {
+  n <- nrow(x)
+  idx <- cbind(seq_len(n), seq_len(n)) # creates a matrix where the first row is 1 1 second is 2 2 and so on
+
+  x[idx] # we can subset by using our matrix of coordinates essentially
+}
+
+diag2(x)
+
+# What does df[is.na(df)] <- 0 do?
+# it replaces all NA's in a dataframe with 0
 ```
 
 Using [[]] and $
@@ -389,6 +471,34 @@ difference between [[]] and []
   -If list x is a train carrying objects, then x[[5]] is the object in car 5; x[4:6] is a train of cars 4-6.
 
 in other words you can either choose a smaller train or a specific item on a train!
+
+```{r}
+# it is recommended to use [[]] when selecting a single element from an atomic vector even though you do not 
+# have to. This reinforces the notion that you are getting and expecting an individual element
+
+# One common mistake with $ is to use it when you have the name of a column stored in a variable:
+var <- "cyl"
+# Doesn't work - mtcars$var translated to mtcars[["var"]]
+mtcars$var
+#> NULL
+
+# Instead use [[
+mtcars[[var]] # [1] 6 6 4 6 8 6 8 4 4 6 6 8 8 8 8 8 8 4 4 4 4 8 8 8 8 4 4 4 8 6 8 4
+
+# The one important difference between $ and [[ is that $ does (left-to-right) partial matching:
+
+x <- list(abs = 1)
+
+x$a # 1
+x[["a"]] # NULL
+
+# a good practice is to do
+options(warnPartialMatchDollar = TRUE)
+x$a # Warning message: In x$a : partial match of 'a' to 'abs'
+
+# in the land of dataframes you can avoid this by using tibbles which never partial match
+```
+
 
 
 ```{r}
@@ -544,6 +654,17 @@ df[start:end, drop = F]
 ```
 
 If x is a matrix, x[] <- 0 will replace every element with 0, keeping the same number of rows and columns. In contrast, x <- 0 completely replaces the matrix with the value 0.
+
+```{r}
+# How could you put the columns in a data frame in alphabetical order?
+df <- data.frame(
+  c = c(1, 2, 3, 1, 2),
+  b = 5:1,
+  a = letters[1:5]
+  )
+
+df[order(names(df))] # use order and names
+```
 
 
 # Control Flow
