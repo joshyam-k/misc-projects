@@ -670,7 +670,21 @@ df[order(names(df))] # use order and names
 # Control Flow
 
 ```{r}
+# general structure
 ifelse(test, yes, no)
+```
+
+```{r}
+greet <- function(name, birthday = FALSE) {
+  paste0(
+    "Hi ", name,
+    if (birthday) " and HAPPY BIRTHDAY"
+  )
+}
+greet("Maria", FALSE)
+#> [1] "Hi Maria"
+greet("Jaime", TRUE)
+#> [1] "Hi Jaime and HAPPY BIRTHDAY"
 ```
 
 ```{r}
@@ -730,10 +744,59 @@ ifelse(TRUE, 1, "no") # 1
 ifelse(FALSE, 1, "no") # no
 ifelse(NA, 1, "no") # NA 
 
+
+# why does this work?
+
+x <- 1:10
+if (length(x)) "not empty" else "empty" # returns "not empty"
+# when the logical in if() is not a typical one it interprets 0 as FALSE and any other number as TRUE
+
 ```
 
 cmd + shift + m is pipe %>%
 option + - is arrow <-
+
+# Control flow
+
+```{r}
+# for loops with next and break
+# next will exit the current iteration
+# break will exit the entire loop
+
+# so in this example we wont print anything less than 3 and we'll stop when we get to an index of 5 or greater
+for (i in 1:10) {
+  if (i < 3) 
+    next
+
+  print(i)
+  
+  if (i >= 5)
+    break
+} # 3 4 5
+
+
+# common pitfalls
+
+# First, if you’re generating data, make sure to preallocate the output container.
+
+means <- c(1, 50, 20)
+out <- vector("list", length(means)) # this is the allocated output container
+for (i in 1:length(means)) {
+  out[[i]] <- rnorm(10, means[[i]])
+}
+out # a list with 3 elements in it and each element contains 10 random numbers
+
+
+# next don't iterate over length(x), this has some buggy issues when length(x) is 0, instead use seq_along(x)
+
+out <- vector("list", length(means))
+for (i in seq_along(means)) {
+  out[[i]] <- rnorm(10, means[[i]])
+}
+out # even though we may not see a difference, by using seq_along we're avoiding errors when means has length 0
+
+# if works with scalars; ifelse() works with vectors
+```
 
 
 # Functions
