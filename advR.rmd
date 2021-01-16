@@ -808,6 +808,17 @@ A function has three parts:
   - The body(), the code inside the function.
 
   - The environment(), the data structure that determines how the function finds the values associated with the     names.
+  
+```{r}
+x <- 10
+f1 <- function(x) {
+  function() {
+    x + 10
+  }
+}
+f1(1)() # 11
+```
+
 
 ```{r}
 f02 <- function(x, y) {
@@ -846,9 +857,36 @@ sapply(mtcars, function(x) length(unique(x)))
 
 ```{r}
 match.fun(mean)
+
+# It’s possible (although typically not useful) to call an anonymous function. Which of the two approaches below
+# is correct? Why?
+
+# function(x) 3() # invalid
+#> function(x) 3()
+(function(x) 3)() # valid, this function function(x) 3 is wrapped in parenthesis before being called by ()
+# the wrapped parenthesis are what makes the anonymous function work
+#> [1] 3
+
+# This code makes a list of all functions in the base package.
+
+objs <- mget(ls("package:base", all = TRUE), inherits = TRUE)
+funs <- Filter(is.function, objs)
+
 ```
 
 Lexical scoping
+
+```{r}
+# a small example to show how it works, basically values defined within a function are used first
+x <- 10
+g01 <- function() {
+  x <- 20
+  x
+}
+
+g01() 
+```
+
 
 -four primary rules it follows
 
@@ -875,12 +913,36 @@ g03 <- function() {
 g03() # outputs 2 1 and importantly
 
 y # ouputs 20 which was the old value for y
+
+
+x <- 1
+g04 <- function() {
+  y <- 2
+  i <- function() {
+    z <- 3
+    c(x, y, z)
+  }
+  i()
+}
+g04() # 1 2 3, this shows off the order in which R looks for variables, first in current function, then where 
+# function is defined, and so on up to the global environment
 ```
 
 ```{r}
 # Functions vs variables
 
 # the same scoping rules apply to functions as well as objects
+
+g07 <- function(x) x + 1
+g08 <- function() {
+  g07 <- function(x) x + 100
+  g07(10)
+}
+g08() # the first function named g07 does not get utilized since R found a function named g07 in the current 
+# function
+#> [1] 110
+
+# since functions are in a way objects, they work the same way in terms of lexical scoping
 
 g09 <- function(x) x + 100
 g10 <- function() {
@@ -889,12 +951,30 @@ g10 <- function() {
 }
 g10() # this outputs 110 because we have both an object and a function defined as g09
 
+# on the whole its best to not give objects and functions the same name because it can get complicated
+
 ```
 
 ```{r}
 # A fresh start
 
 #every time a function is called a new environment is created to host its execution. This means that a function #has no way to tell what happened the last time it was run; each invocation is completely independent.
+
+g11 <- function() {
+  if (!exists("a")) {
+    a <- 1
+  } else {
+    a <- a + 1
+  }
+  a
+}
+
+g11() # 1
+g11() # 1
+
+# fresh start!! it seems like objects that are bound to a name in a function to do not become part of the
+# environment when the function is run, this was seen earlier too as the value of y defined outside of the function stayed the same after a function was run which bound another object to the name y.
+
 ```
 
 ```{r}
