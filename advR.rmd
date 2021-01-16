@@ -1018,7 +1018,15 @@ f(10) # 202
 Lazy evaluation
 
 ```{r}
+h01 <- function(x) {
+  10
+}
+h01(stop("This is an error!"))
+#> [1] 10, this works because x is never accessed
+
 # promises
+
+
 
 # three components
 
@@ -1078,26 +1086,54 @@ f2 <- function(x = z) {
   z <- 100
   x
 }
-f2()
+f2() # 100, this shows off lazy evaluation as x = z gets lazily evaluated after z has already been bound to 100
 ```
 
 ```{r}
 y <- 10
-f1 <- function(x = {y <- 1; 2}, y = 0) {
+f1 <- function(x = {y <- 1; 2}, y = 0) { # {y <- 1;2} assigns 1 to y and then outputs 2 which gets assigned to x
   c(x, y)
 }
-f1()
+f1() # 2 1 
+# When y gets accessed next within c(), it has already the value 1 and R doesn’t need to look it up any further.
+# Therefore, the promise y = 0 won’t be evaluated.
+y # 10, also the global y value is left untouched
 
+# Explain why this function works. Why is it confusing?
+
+show_time <- function(x = stop("Error!")) {
+  stop <- function(...) Sys.time()
+  print(x)
+}
+show_time() 
+#> [1] "2021-01-16 14:30:34 PST"
+
+# before x = stop("Error!") is accessed the stop function gets overwritten to be a function that outputs
+# Sys.time() so when x is called it is evaluated as Sys.time()
 ```
 
 ```{r}
-# dot-dot-dot ...
+# ... (dot-dot-dot) 
 
+# using ... with list()
 i04 <- function(...) {
   list(...)
 }
 
 i04(a = 1, b = 2, j = "jack") # just an example
+
+# You can also use ... to pass those additional arguments on to another function.
+
+i01 <- function(y, z) {
+  list(y = y, z = z)
+}
+
+i02 <- function(x, ...) {
+  i01(...)
+}
+
+i02(x = 1, y = 2, z = 3) # creates a list with elements 2 and 3. x is unused here because it isn't called
+# outside of the function
 
 # the primary uses of ...
 
