@@ -1186,9 +1186,53 @@ j04() # this outputs nothing
 
 # the most common usage of invisible functions is the <-, for ex a <- 1 doesnt output anything
 
+a <- 1
+(a <- 1) # outputs 1 because we wrapped the function in parenthesis
+
 # to see the output we can wrap in parenthesis
 
 (j04()) # this outputs 1 which is normally invisible
+```
+
+```{r}
+# errors
+
+j05 <- function() {
+  stop("I'm an error")
+  return(10)
+}
+j05() # Error in j05() : I'm an error
+
+# exit handlers
+# you can use on.exit to output something no matter what happens with the function
+# you have to include add = TRUE for it to be printed
+
+j06 <- function(x) {
+  cat("Hello\n")
+  on.exit(cat("Goodbye!\n"), add = TRUE)
+  
+  if (x) {
+    return(10)
+  } else {
+    stop("Error")
+  }
+}
+
+j06(TRUE)
+#> Hello
+#> Goodbye!
+#> [1] 10
+```
+
+```{r}
+# function forms
+
+# prefix func(x, y, z)
+# infix x + y
+# replacement names(df) <- c("a", "b", "c")
+# special [[, if, for
+
+# any call can be written in prefix form
 ```
 
 ### Environments
