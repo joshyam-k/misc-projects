@@ -1645,11 +1645,35 @@ fm <- function() {
 }
 
 fm() # check output to see how message works
+
+# good places to use messages
+
+# When a default argument requires some non-trivial amount of computation and you want to tell the user what
+# value was used. (binwidth with ggplot)
+
+# some other high level reasons
+
+# difference between cat and message
+
+cat("Hi!\n") 
+#> Hi!
+
+message("Hi!")
+#> Hi!
+
+# the outputs are similar but the purposes are different
+# use cat when the primary role of the function is to print into the console (upper-right), ex: print(), str()
+# Use message() as a side-channel to print to the console when the primary purpose of the function is
+# something else
+
+# in other words use cat when a user wants something printed and message when the developer _elects_ to print 
+# something
 ```
 
 ```{r}
 # exercises
 
+# write a wrapper for file.remove that throws an error if the file to be deleted does not exist
 file_remove <- function(file){
   if (!file.exists(file)){
     stop("Can't delete the file \"", file,
