@@ -1526,8 +1526,8 @@ where("mean")
 ```{r}
 # exercises
 
-# Modify where() to return all environments that contain a binding for name. Carefully think through what type of
-# object the function will need to return.
+# Modify where() to return all environments that contain a binding for name. Carefully think through what 
+# type of object the function will need to return.
 
 where2 <- function(name, env = caller_env(), results = list()) {
   if (identical(env, empty_env())) {
